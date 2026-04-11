@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FC Walpole | OTHSL</title>
+<style>
+  :root {
+    --bg: #f4efe4;
+    --panel: rgba(255, 252, 247, 0.9);
+    --panel-strong: #fffaf1;
+    --ink: #1f2a1f;
+    --muted: #5f695f;
+    --line: rgba(38, 61, 41, 0.14);
+    --field: #23442b;
+    --accent: #c68a2b;
+    --win: #237744;
+    --loss: #a63f35;
+    --draw: #7d6d50;
+    --shadow: 0 20px 50px rgba(27, 38, 29, 0.12);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at top left, rgba(198, 138, 43, 0.16), transparent 32%),
+      radial-gradient(circle at top right, rgba(35, 68, 43, 0.2), transparent 28%),
+      linear-gradient(180deg, #f8f3e9 0%, var(--bg) 55%, #efe6d4 100%);
+  }
+
+  a { color: inherit; }
+
+  .page {
+    width: min(1180px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 28px 0 56px;
+    opacity: 0;
+    transform: translateY(14px);
+    animation: page-enter 0.55s ease forwards;
+  }
+
+  body.is-leaving .page {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+
+  @keyframes page-enter {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .topbar {
+    margin-bottom: 18px;
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+
+  .topbar a {
+    text-decoration: none;
+  }
+
+  .hero {
+    padding: 34px;
+    border-radius: 28px;
+    color: #f7f2e8;
+    background:
+      linear-gradient(135deg, rgba(23, 52, 31, 0.96), rgba(41, 76, 49, 0.92)),
+      linear-gradient(135deg, rgba(198, 138, 43, 0.16), transparent);
+    box-shadow: var(--shadow);
+  }
+
+  .hero h1 {
+    margin: 10px 0 10px;
+    font-size: clamp(2.3rem, 5vw, 4rem);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+  }
+
+  .hero p {
+    margin: 0;
+    color: rgba(247, 242, 232, 0.8);
+    font-size: 1rem;
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .chip {
+    padding: 9px 13px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 0.9rem;
+  }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 22px;
+  }
+
+  .metric {
+    padding: 16px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .label {
+    display: block;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+    color: rgba(247, 242, 232, 0.66);
+  }
+
+  .metric .value {
+    font-size: 1.75rem;
+    line-height: 1;
+  }
+
+  .section {
+    margin-top: 22px;
+    padding: 26px;
+    border-radius: 24px;
+    background: var(--panel);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: var(--shadow);
+  }
+
+  .section-title {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: end;
+    margin-bottom: 18px;
+  }
+
+  .section-title h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    letter-spacing: -0.03em;
+  }
+
+  .section-title p,
+  .note {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1.15fr 0.95fr;
+    gap: 18px;
+  }
+
+  .panel,
+  .chart-card {
+    padding: 22px;
+    border-radius: 22px;
+    background: var(--panel-strong);
+    border: 1px solid var(--line);
+  }
+
+  .chart-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .chart-range {
+    padding: 9px 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(35, 68, 43, 0.06);
+    color: var(--field);
+    font: inherit;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+  }
+
+  .chart-range:hover {
+    transform: translateY(-1px);
+  }
+
+  .chart-range.is-active {
+    background: var(--field);
+    color: #f9f4ea;
+  }
+
+  .chart-note {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+
+  .panel h3 {
+    margin: 0 0 14px;
+    font-size: 1.1rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+
+  th {
+    padding: 11px 10px;
+    text-align: left;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+  }
+
+  td {
+    padding: 12px 10px;
+    border-bottom: 1px solid rgba(38, 61, 41, 0.08);
+  }
+
+  tbody tr:hover td {
+    background: rgba(35, 68, 43, 0.04);
+  }
+
+  tr.highlight td {
+    background: rgba(35, 68, 43, 0.08);
+    font-weight: 700;
+  }
+
+  .result-pill {
+    display: inline-flex;
+    min-width: 34px;
+    justify-content: center;
+    padding: 5px 8px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .W { color: var(--win); }
+  .L, .F { color: var(--loss); }
+  .T { color: var(--draw); }
+
+  .result-pill.W { background: rgba(35, 119, 68, 0.12); }
+  .result-pill.L, .result-pill.F { background: rgba(166, 63, 53, 0.12); }
+  .result-pill.T { background: rgba(125, 109, 80, 0.12); }
+
+  #elo-chart {
+    width: 100%;
+    height: 240px;
+    display: block;
+    margin-top: 10px;
+  }
+
+  footer {
+    margin-top: 22px;
+    padding: 20px 6px 8px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  @media (max-width: 960px) {
+    .metrics,
+    .layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .page {
+      width: min(100% - 20px, 1180px);
+      padding-top: 14px;
+    }
+
+    .hero,
+    .section {
+      padding: 20px;
+      border-radius: 22px;
+    }
+
+    .metrics {
+      grid-template-columns: 1fr;
+    }
+
+    .section-title {
+      flex-direction: column;
+      align-items: start;
+    }
+  }
+</style>
+</head>
+<body>
+  <main class="page">
+    <div class="topbar"><a class="page-link" href="../../index.html">Back to homepage</a></div>
+
+    <section class="hero">
+      <p>Spring 2026</p>
+      <h1>FC Walpole</h1>
+      <p>Over 40 Division 5 South</p>
+
+      <div class="chips">
+        
+        <span class="chip">ELO 1507</span>
+        
+        
+        <span class="chip">Current place: 1</span>
+        
+        <span class="chip">Record 1-0-0</span>
+      </div>
+
+      <div class="metrics">
+        <div class="metric">
+          <span class="label">Games</span>
+          <div class="value">1</div>
+        </div>
+        <div class="metric">
+          <span class="label">Wins</span>
+          <div class="value">1</div>
+        </div>
+        <div class="metric">
+          <span class="label">Losses</span>
+          <div class="value">0</div>
+        </div>
+        <div class="metric">
+          <span class="label">Draws</span>
+          <div class="value">0</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title">
+        <div>
+          <h2>Team Snapshot</h2>
+          <p>Current results, standings context, and ELO trend for this selected team.</p>
+        </div>
+      </div>
+
+      <div class="layout">
+        <div class="panel">
+          <h3>Results</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>H/A</th>
+                <th>Opponent</th>
+                <th>Score</th>
+                <th>Result</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+              <tr>
+                <td>2026-04-05</td>
+                <td>H</td>
+                <td>Hogs FC</td>
+                <td>
+                  4-0
+                  
+                </td>
+                <td><span class="result-pill W">W</span></td>
+              </tr>
+              
+            </tbody>
+          </table>
+        </div>
+
+        <div class="panel">
+          <h3>Flight Standings</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Team</th>
+                <th>GP</th>
+                <th>Pts</th>
+                <th>GD</th>
+                <th>PPG</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+              <tr class="highlight">
+                <td>FC Walpole</td>
+                <td>1</td>
+                <td>3</td>
+                <td>+4</td>
+                <td>3.00</td>
+              </tr>
+              
+              <tr>
+                <td>HTK FC</td>
+                <td>1</td>
+                <td>1</td>
+                <td>+0</td>
+                <td>1.00</td>
+              </tr>
+              
+              <tr>
+                <td>Irish Village White</td>
+                <td>1</td>
+                <td>1</td>
+                <td>+0</td>
+                <td>1.00</td>
+              </tr>
+              
+              <tr>
+                <td>FC Franklin II</td>
+                <td>1</td>
+                <td>1</td>
+                <td>+0</td>
+                <td>1.00</td>
+              </tr>
+              
+              <tr>
+                <td>Medfield</td>
+                <td>1</td>
+                <td>1</td>
+                <td>+0</td>
+                <td>1.00</td>
+              </tr>
+              
+              <tr>
+                <td>Hogs FC</td>
+                <td>1</td>
+                <td>0</td>
+                <td>-4</td>
+                <td>0.00</td>
+              </tr>
+              
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="chart-card" style="margin-top:18px">
+        <div class="section-title">
+          <div>
+            <h2 style="font-size:1.25rem">ELO Trend</h2>
+            <p>Current form at a glance, with range controls modeled after a stock chart view.</p>
+          </div>
+        </div>
+        <div class="chart-toolbar">
+          
+          <button
+            class="chart-range is-active"
+            type="button"
+            data-range="current"
+          >This season</button>
+          
+          <button
+            class="chart-range"
+            type="button"
+            data-range="5"
+          >Past 5 seasons</button>
+          
+          <button
+            class="chart-range"
+            type="button"
+            data-range="all"
+          >All seasons</button>
+          
+        </div>
+        <div id="chart-note" class="chart-note">
+          Showing this season for FC Walpole in Over 40.
+        </div>
+        <canvas id="elo-chart"></canvas>
+      </div>
+    </section>
+
+    <footer>
+      A Khaykin and Kane production. Data scraped from <a href="https://www.othsl.org">othsl.org</a>.
+      ELO ratings are model estimates, not official standings.
+    </footer>
+  </main>
+
+<script>
+const eloData = [{"age_group": "Over 40", "date": "2020-09-13", "elo": 1514.9, "label": "Fall 2020 \u00b7 2020-09-13", "season": "Fall 2020"}, {"age_group": "Over 40", "date": "2020-09-20", "elo": 1531.6, "label": "Fall 2020 \u00b7 2020-09-20", "season": "Fall 2020"}, {"age_group": "Over 40", "date": "2020-10-04", "elo": 1546.0, "label": "Fall 2020 \u00b7 2020-10-04", "season": "Fall 2020"}, {"age_group": "Over 40", "date": "2020-10-11", "elo": 1560.4, "label": "Fall 2020 \u00b7 2020-10-11", "season": "Fall 2020"}, {"age_group": "Over 40", "date": "2020-10-18", "elo": 1573.4, "label": "Fall 2020 \u00b7 2020-10-18", "season": "Fall 2020"}, {"age_group": "Over 40", "date": "2020-10-25", "elo": 1568.8, "label": "Fall 2020 \u00b7 2020-10-25", "season": "Fall 2020"}, {"age_group": "Over 40", "date": "2020-11-08", "elo": 1564.9, "label": "Fall 2020 \u00b7 2020-11-08", "season": "Fall 2020"}, {"age_group": "Over 40", "date": "2020-11-15", "elo": 1547.0, "label": "Fall 2020 \u00b7 2020-11-15", "season": "Fall 2020"}, {"age_group": "Over 40", "date": "2021-04-04", "elo": 1440.4, "label": "Spring 2021 \u00b7 2021-04-04", "season": "Spring 2021"}, {"age_group": "Over 40", "date": "2021-04-11", "elo": 1455.8, "label": "Spring 2021 \u00b7 2021-04-11", "season": "Spring 2021"}, {"age_group": "Over 40", "date": "2021-04-18", "elo": 1473.5, "label": "Spring 2021 \u00b7 2021-04-18", "season": "Spring 2021"}, {"age_group": "Over 40", "date": "2021-04-25", "elo": 1490.5, "label": "Spring 2021 \u00b7 2021-04-25", "season": "Spring 2021"}, {"age_group": "Over 40", "date": "2021-05-02", "elo": 1489.7, "label": "Spring 2021 \u00b7 2021-05-02", "season": "Spring 2021"}, {"age_group": "Over 40", "date": "2021-05-09", "elo": 1493.3, "label": "Spring 2021 \u00b7 2021-05-09", "season": "Spring 2021"}, {"age_group": "Over 40", "date": "2021-05-16", "elo": 1507.3, "label": "Spring 2021 \u00b7 2021-05-16", "season": "Spring 2021"}, {"age_group": "Over 40", "date": "2021-05-23", "elo": 1521.3, "label": "Spring 2021 \u00b7 2021-05-23", "season": "Spring 2021"}, {"age_group": "Over 40", "date": "2021-06-06", "elo": 1535.3, "label": "Spring 2021 \u00b7 2021-06-06", "season": "Spring 2021"}, {"age_group": "Over 40", "date": "2021-06-13", "elo": 1544.5, "label": "Spring 2021 \u00b7 2021-06-13", "season": "Spring 2021"}, {"age_group": "Over 40", "date": "2021-06-20", "elo": 1531.1, "label": "Spring 2021 \u00b7 2021-06-20", "season": "Spring 2021"}, {"age_group": "Over 40", "date": "2021-06-20", "elo": 1519.0, "label": "Spring 2021 \u00b7 2021-06-20", "season": "Spring 2021"}, {"age_group": "Over 40", "date": "2021-08-29", "elo": 1542.0, "label": "Fall 2021 \u00b7 2021-08-29", "season": "Fall 2021"}, {"age_group": "Over 40", "date": "2021-09-12", "elo": 1525.3, "label": "Fall 2021 \u00b7 2021-09-12", "season": "Fall 2021"}, {"age_group": "Over 40", "date": "2021-09-19", "elo": 1540.1, "label": "Fall 2021 \u00b7 2021-09-19", "season": "Fall 2021"}, {"age_group": "Over 40", "date": "2021-09-26", "elo": 1537.9, "label": "Fall 2021 \u00b7 2021-09-26", "season": "Fall 2021"}, {"age_group": "Over 40", "date": "2021-10-03", "elo": 1536.1, "label": "Fall 2021 \u00b7 2021-10-03", "season": "Fall 2021"}, {"age_group": "Over 40", "date": "2021-10-10", "elo": 1519.0, "label": "Fall 2021 \u00b7 2021-10-10", "season": "Fall 2021"}, {"age_group": "Over 40", "date": "2021-10-17", "elo": 1501.1, "label": "Fall 2021 \u00b7 2021-10-17", "season": "Fall 2021"}, {"age_group": "Over 40", "date": "2021-10-24", "elo": 1485.6, "label": "Fall 2021 \u00b7 2021-10-24", "season": "Fall 2021"}, {"age_group": "Over 40", "date": "2021-10-31", "elo": 1470.0, "label": "Fall 2021 \u00b7 2021-10-31", "season": "Fall 2021"}, {"age_group": "Over 40", "date": "2021-11-07", "elo": 1491.1, "label": "Fall 2021 \u00b7 2021-11-07", "season": "Fall 2021"}, {"age_group": "Over 40", "date": "2022-04-03", "elo": 1524.1, "label": "Spring 2022 \u00b7 2022-04-03", "season": "Spring 2022"}, {"age_group": "Over 40", "date": "2022-04-10", "elo": 1535.0, "label": "Spring 2022 \u00b7 2022-04-10", "season": "Spring 2022"}, {"age_group": "Over 40", "date": "2022-04-17", "elo": 1518.0, "label": "Spring 2022 \u00b7 2022-04-17", "season": "Spring 2022"}, {"age_group": "Over 40", "date": "2022-04-24", "elo": 1522.8, "label": "Spring 2022 \u00b7 2022-04-24", "season": "Spring 2022"}, {"age_group": "Over 40", "date": "2022-05-01", "elo": 1536.6, "label": "Spring 2022 \u00b7 2022-05-01", "season": "Spring 2022"}, {"age_group": "Over 40", "date": "2022-05-08", "elo": 1549.2, "label": "Spring 2022 \u00b7 2022-05-08", "season": "Spring 2022"}, {"age_group": "Over 40", "date": "2022-05-15", "elo": 1552.1, "label": "Spring 2022 \u00b7 2022-05-15", "season": "Spring 2022"}, {"age_group": "Over 40", "date": "2022-05-22", "elo": 1568.3, "label": "Spring 2022 \u00b7 2022-05-22", "season": "Spring 2022"}, {"age_group": "Over 40", "date": "2022-06-05", "elo": 1576.7, "label": "Spring 2022 \u00b7 2022-06-05", "season": "Spring 2022"}, {"age_group": "Over 40", "date": "2022-06-12", "elo": 1585.5, "label": "Spring 2022 \u00b7 2022-06-12", "season": "Spring 2022"}, {"age_group": "Over 40", "date": "2022-06-19", "elo": 1602.1, "label": "Spring 2022 \u00b7 2022-06-19", "season": "Spring 2022"}, {"age_group": "Over 40", "date": "2022-06-19", "elo": 1617.1, "label": "Spring 2022 \u00b7 2022-06-19", "season": "Spring 2022"}, {"age_group": "Over 40", "date": "2022-06-26", "elo": 1600.3, "label": "Spring 2022 \u00b7 2022-06-26", "season": "Spring 2022"}, {"age_group": "Over 40", "date": "2022-06-26", "elo": 1585.1, "label": "Spring 2022 \u00b7 2022-06-26", "season": "Spring 2022"}, {"age_group": "Over 40", "date": "2022-08-28", "elo": 1510.9, "label": "Fall 2022 \u00b7 2022-08-28", "season": "Fall 2022"}, {"age_group": "Over 40", "date": "2022-09-11", "elo": 1512.1, "label": "Fall 2022 \u00b7 2022-09-11", "season": "Fall 2022"}, {"age_group": "Over 40", "date": "2022-09-18", "elo": 1526.6, "label": "Fall 2022 \u00b7 2022-09-18", "season": "Fall 2022"}, {"age_group": "Over 40", "date": "2022-09-25", "elo": 1538.3, "label": "Fall 2022 \u00b7 2022-09-25", "season": "Fall 2022"}, {"age_group": "Over 40", "date": "2022-10-02", "elo": 1523.1, "label": "Fall 2022 \u00b7 2022-10-02", "season": "Fall 2022"}, {"age_group": "Over 40", "date": "2022-10-09", "elo": 1536.0, "label": "Fall 2022 \u00b7 2022-10-09", "season": "Fall 2022"}, {"age_group": "Over 40", "date": "2022-10-16", "elo": 1548.3, "label": "Fall 2022 \u00b7 2022-10-16", "season": "Fall 2022"}, {"age_group": "Over 40", "date": "2022-10-23", "elo": 1560.0, "label": "Fall 2022 \u00b7 2022-10-23", "season": "Fall 2022"}, {"age_group": "Over 40", "date": "2022-10-30", "elo": 1572.1, "label": "Fall 2022 \u00b7 2022-10-30", "season": "Fall 2022"}, {"age_group": "Over 40", "date": "2022-11-06", "elo": 1556.4, "label": "Fall 2022 \u00b7 2022-11-06", "season": "Fall 2022"}, {"age_group": "Over 40", "date": "2023-04-02", "elo": 1566.1, "label": "Spring 2023 \u00b7 2023-04-02", "season": "Spring 2023"}, {"age_group": "Over 40", "date": "2023-04-09", "elo": 1545.0, "label": "Spring 2023 \u00b7 2023-04-09", "season": "Spring 2023"}, {"age_group": "Over 40", "date": "2023-04-16", "elo": 1531.6, "label": "Spring 2023 \u00b7 2023-04-16", "season": "Spring 2023"}, {"age_group": "Over 40", "date": "2023-04-23", "elo": 1544.8, "label": "Spring 2023 \u00b7 2023-04-23", "season": "Spring 2023"}, {"age_group": "Over 40", "date": "2023-04-30", "elo": 1560.1, "label": "Spring 2023 \u00b7 2023-04-30", "season": "Spring 2023"}, {"age_group": "Over 40", "date": "2023-05-07", "elo": 1557.4, "label": "Spring 2023 \u00b7 2023-05-07", "season": "Spring 2023"}, {"age_group": "Over 40", "date": "2023-05-14", "elo": 1567.9, "label": "Spring 2023 \u00b7 2023-05-14", "season": "Spring 2023"}, {"age_group": "Over 40", "date": "2023-05-21", "elo": 1570.4, "label": "Spring 2023 \u00b7 2023-05-21", "season": "Spring 2023"}, {"age_group": "Over 40", "date": "2023-06-04", "elo": 1584.4, "label": "Spring 2023 \u00b7 2023-06-04", "season": "Spring 2023"}, {"age_group": "Over 40", "date": "2023-06-11", "elo": 1598.6, "label": "Spring 2023 \u00b7 2023-06-11", "season": "Spring 2023"}, {"age_group": "Over 40", "date": "2023-06-18", "elo": 1583.8, "label": "Spring 2023 \u00b7 2023-06-18", "season": "Spring 2023"}, {"age_group": "Over 40", "date": "2023-06-18", "elo": 1570.3, "label": "Spring 2023 \u00b7 2023-06-18", "season": "Spring 2023"}, {"age_group": "Over 40", "date": "2023-08-27", "elo": 1520.9, "label": "Fall 2023 \u00b7 2023-08-27", "season": "Fall 2023"}, {"age_group": "Over 40", "date": "2023-09-10", "elo": 1506.3, "label": "Fall 2023 \u00b7 2023-09-10", "season": "Fall 2023"}, {"age_group": "Over 40", "date": "2023-09-17", "elo": 1490.5, "label": "Fall 2023 \u00b7 2023-09-17", "season": "Fall 2023"}, {"age_group": "Over 40", "date": "2023-09-24", "elo": 1505.9, "label": "Fall 2023 \u00b7 2023-09-24", "season": "Fall 2023"}, {"age_group": "Over 40", "date": "2023-10-01", "elo": 1507.0, "label": "Fall 2023 \u00b7 2023-10-01", "season": "Fall 2023"}, {"age_group": "Over 40", "date": "2023-10-08", "elo": 1506.0, "label": "Fall 2023 \u00b7 2023-10-08", "season": "Fall 2023"}, {"age_group": "Over 40", "date": "2023-10-15", "elo": 1521.9, "label": "Fall 2023 \u00b7 2023-10-15", "season": "Fall 2023"}, {"age_group": "Over 40", "date": "2023-10-22", "elo": 1507.1, "label": "Fall 2023 \u00b7 2023-10-22", "season": "Fall 2023"}, {"age_group": "Over 40", "date": "2023-10-29", "elo": 1493.0, "label": "Fall 2023 \u00b7 2023-10-29", "season": "Fall 2023"}, {"age_group": "Over 40", "date": "2023-11-05", "elo": 1481.5, "label": "Fall 2023 \u00b7 2023-11-05", "season": "Fall 2023"}, {"age_group": "Over 40", "date": "2024-04-07", "elo": 1530.3, "label": "Spring 2024 \u00b7 2024-04-07", "season": "Spring 2024"}, {"age_group": "Over 40", "date": "2024-04-14", "elo": 1514.2, "label": "Spring 2024 \u00b7 2024-04-14", "season": "Spring 2024"}, {"age_group": "Over 40", "date": "2024-04-21", "elo": 1501.1, "label": "Spring 2024 \u00b7 2024-04-21", "season": "Spring 2024"}, {"age_group": "Over 40", "date": "2024-04-28", "elo": 1488.6, "label": "Spring 2024 \u00b7 2024-04-28", "season": "Spring 2024"}, {"age_group": "Over 40", "date": "2024-05-05", "elo": 1477.7, "label": "Spring 2024 \u00b7 2024-05-05", "season": "Spring 2024"}, {"age_group": "Over 40", "date": "2024-05-19", "elo": 1477.0, "label": "Spring 2024 \u00b7 2024-05-19", "season": "Spring 2024"}, {"age_group": "Over 40", "date": "2024-06-02", "elo": 1465.6, "label": "Spring 2024 \u00b7 2024-06-02", "season": "Spring 2024"}, {"age_group": "Over 40", "date": "2024-06-09", "elo": 1457.7, "label": "Spring 2024 \u00b7 2024-06-09", "season": "Spring 2024"}, {"age_group": "Over 40", "date": "2024-06-16", "elo": 1447.3, "label": "Spring 2024 \u00b7 2024-06-16", "season": "Spring 2024"}, {"age_group": "Over 40", "date": "2024-09-08", "elo": 1489.4, "label": "Fall 2024 \u00b7 2024-09-08", "season": "Fall 2024"}, {"age_group": "Over 40", "date": "2024-09-15", "elo": 1472.9, "label": "Fall 2024 \u00b7 2024-09-15", "season": "Fall 2024"}, {"age_group": "Over 40", "date": "2024-09-22", "elo": 1462.3, "label": "Fall 2024 \u00b7 2024-09-22", "season": "Fall 2024"}, {"age_group": "Over 40", "date": "2024-09-29", "elo": 1447.2, "label": "Fall 2024 \u00b7 2024-09-29", "season": "Fall 2024"}, {"age_group": "Over 40", "date": "2024-10-06", "elo": 1437.3, "label": "Fall 2024 \u00b7 2024-10-06", "season": "Fall 2024"}, {"age_group": "Over 40", "date": "2024-10-20", "elo": 1420.7, "label": "Fall 2024 \u00b7 2024-10-20", "season": "Fall 2024"}, {"age_group": "Over 40", "date": "2024-10-27", "elo": 1412.1, "label": "Fall 2024 \u00b7 2024-10-27", "season": "Fall 2024"}, {"age_group": "Over 40", "date": "2024-11-03", "elo": 1397.2, "label": "Fall 2024 \u00b7 2024-11-03", "season": "Fall 2024"}, {"age_group": "Over 40", "date": "2024-11-10", "elo": 1387.6, "label": "Fall 2024 \u00b7 2024-11-10", "season": "Fall 2024"}, {"age_group": "Over 40", "date": "2025-04-06", "elo": 1451.4, "label": "Spring 2025 \u00b7 2025-04-06", "season": "Spring 2025"}, {"age_group": "Over 40", "date": "2025-04-13", "elo": 1468.9, "label": "Spring 2025 \u00b7 2025-04-13", "season": "Spring 2025"}, {"age_group": "Over 40", "date": "2025-04-27", "elo": 1481.9, "label": "Spring 2025 \u00b7 2025-04-27", "season": "Spring 2025"}, {"age_group": "Over 40", "date": "2025-04-30", "elo": 1497.9, "label": "Spring 2025 \u00b7 2025-04-30", "season": "Spring 2025"}, {"age_group": "Over 40", "date": "2025-05-04", "elo": 1478.8, "label": "Spring 2025 \u00b7 2025-05-04", "season": "Spring 2025"}, {"age_group": "Over 40", "date": "2025-05-11", "elo": 1496.3, "label": "Spring 2025 \u00b7 2025-05-11", "season": "Spring 2025"}, {"age_group": "Over 40", "date": "2025-05-18", "elo": 1482.7, "label": "Spring 2025 \u00b7 2025-05-18", "season": "Spring 2025"}, {"age_group": "Over 40", "date": "2025-06-01", "elo": 1466.6, "label": "Spring 2025 \u00b7 2025-06-01", "season": "Spring 2025"}, {"age_group": "Over 40", "date": "2025-06-08", "elo": 1484.0, "label": "Spring 2025 \u00b7 2025-06-08", "season": "Spring 2025"}, {"age_group": "Over 40", "date": "2025-06-15", "elo": 1483.8, "label": "Spring 2025 \u00b7 2025-06-15", "season": "Spring 2025"}, {"age_group": "Over 40", "date": "2025-09-07", "elo": 1422.2, "label": "Fall 2025 \u00b7 2025-09-07", "season": "Fall 2025"}, {"age_group": "Over 40", "date": "2025-09-14", "elo": 1410.3, "label": "Fall 2025 \u00b7 2025-09-14", "season": "Fall 2025"}, {"age_group": "Over 40", "date": "2025-09-21", "elo": 1396.9, "label": "Fall 2025 \u00b7 2025-09-21", "season": "Fall 2025"}, {"age_group": "Over 40", "date": "2025-09-28", "elo": 1401.2, "label": "Fall 2025 \u00b7 2025-09-28", "season": "Fall 2025"}, {"age_group": "Over 40", "date": "2025-10-05", "elo": 1389.8, "label": "Fall 2025 \u00b7 2025-10-05", "season": "Fall 2025"}, {"age_group": "Over 40", "date": "2025-10-12", "elo": 1391.7, "label": "Fall 2025 \u00b7 2025-10-12", "season": "Fall 2025"}, {"age_group": "Over 40", "date": "2025-10-19", "elo": 1394.4, "label": "Fall 2025 \u00b7 2025-10-19", "season": "Fall 2025"}, {"age_group": "Over 40", "date": "2025-10-26", "elo": 1382.8, "label": "Fall 2025 \u00b7 2025-10-26", "season": "Fall 2025"}, {"age_group": "Over 40", "date": "2025-11-02", "elo": 1375.4, "label": "Fall 2025 \u00b7 2025-11-02", "season": "Fall 2025"}, {"age_group": "Over 40", "date": "2025-11-09", "elo": 1367.8, "label": "Fall 2025 \u00b7 2025-11-09", "season": "Fall 2025"}, {"age_group": "Over 40", "date": "2026-04-05", "elo": 1507.3, "label": "Spring 2026 \u00b7 2026-04-05", "season": "Spring 2026"}];
+const currentSeason = "Spring 2026";
+const eloSeasons = ["Fall 2020", "Spring 2021", "Fall 2021", "Spring 2022", "Fall 2022", "Spring 2023", "Fall 2023", "Spring 2024", "Fall 2024", "Spring 2025", "Fall 2025", "Spring 2026"];
+
+(function() {
+  const canvas = document.getElementById("elo-chart");
+  const ctx = canvas.getContext("2d");
+  const card = canvas.parentElement;
+  const rangeButtons = Array.from(document.querySelectorAll(".chart-range"));
+  const chartNote = document.getElementById("chart-note");
+  const pageLinks = Array.from(document.querySelectorAll(".page-link"));
+
+  function filterHistory(range) {
+    if (range === "current") {
+      return eloData.filter((point) => point.season === currentSeason);
+    }
+
+    if (range === "5") {
+      const seasons = eloSeasons.slice(-5);
+      return eloData.filter((point) => seasons.includes(point.season));
+    }
+
+    return eloData;
+  }
+
+  function rangeLabel(range) {
+    if (range === "current") return "this season";
+    if (range === "5") return "the past 5 seasons";
+    return "all seasons";
+  }
+
+  function draw(range) {
+    const activeData = filterHistory(range);
+    canvas.width = card.clientWidth;
+    canvas.height = 240;
+
+    const W = canvas.width;
+    const H = canvas.height;
+    const pad = { top: 20, bottom: 34, left: 54, right: 20 };
+
+    ctx.clearRect(0, 0, W, H);
+
+    if (activeData.length < 2) {
+      ctx.fillStyle = "#5f695f";
+      ctx.font = "16px Georgia";
+      ctx.fillText("Not enough ELO history yet.", 20, 120);
+      return;
+    }
+
+    const elos = activeData.map((d) => d.elo);
+    const minElo = Math.min(...elos) - 15;
+    const maxElo = Math.max(...elos) + 15;
+
+    function xPos(i) {
+      return pad.left + (i / (elos.length - 1)) * (W - pad.left - pad.right);
+    }
+
+    function yPos(v) {
+      return pad.top + (1 - (v - minElo) / (maxElo - minElo || 1)) * (H - pad.top - pad.bottom);
+    }
+
+    ctx.strokeStyle = "rgba(35, 68, 43, 0.12)";
+    ctx.lineWidth = 1;
+
+    const tickCount = 4;
+    for (let i = 0; i <= tickCount; i += 1) {
+      const value = minElo + ((maxElo - minElo) * i / tickCount);
+      const y = yPos(value);
+      ctx.beginPath();
+      ctx.moveTo(pad.left, y);
+      ctx.lineTo(W - pad.right, y);
+      ctx.stroke();
+
+      ctx.fillStyle = "#5f695f";
+      ctx.font = "11px sans-serif";
+      ctx.textAlign = "right";
+      ctx.fillText(Math.round(value), pad.left - 8, y + 4);
+    }
+
+    if (1500 >= minElo && 1500 <= maxElo) {
+      ctx.save();
+      ctx.strokeStyle = "rgba(198, 138, 43, 0.9)";
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(pad.left, yPos(1500));
+      ctx.lineTo(W - pad.right, yPos(1500));
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    const gradient = ctx.createLinearGradient(0, pad.top, 0, H - pad.bottom);
+    gradient.addColorStop(0, "rgba(35, 68, 43, 0.3)");
+    gradient.addColorStop(1, "rgba(35, 68, 43, 0.02)");
+
+    ctx.beginPath();
+    ctx.moveTo(xPos(0), H - pad.bottom);
+    elos.forEach((value, i) => {
+      const x = xPos(i);
+      const y = yPos(value);
+      if (i === 0) {
+        ctx.lineTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    });
+    ctx.lineTo(xPos(elos.length - 1), H - pad.bottom);
+    ctx.closePath();
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    let segmentOpen = false;
+    ctx.beginPath();
+    activeData.forEach((point, i) => {
+      const value = point.elo;
+      const x = xPos(i);
+      const y = yPos(value);
+      const previous = i > 0 ? activeData[i - 1] : null;
+      const sameSeasonAsPrevious = previous && previous.season === point.season;
+
+      if (!segmentOpen || !sameSeasonAsPrevious) {
+        ctx.moveTo(x, y);
+        segmentOpen = true;
+      } else {
+        ctx.lineTo(x, y);
+      }
+    });
+    ctx.strokeStyle = "#23442b";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    const tickIndexes = [];
+    const desiredTickCount = Math.min(6, activeData.length);
+    for (let i = 0; i < desiredTickCount; i += 1) {
+      tickIndexes.push(Math.round((i * (activeData.length - 1)) / Math.max(desiredTickCount - 1, 1)));
+    }
+
+    activeData.forEach((point, i) => {
+      const value = point.elo;
+      const x = xPos(i);
+      const y = yPos(value);
+
+      ctx.fillStyle = "#f9f4ea";
+      ctx.beginPath();
+      ctx.arc(x, y, 5.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#23442b";
+      ctx.beginPath();
+      ctx.arc(x, y, 3.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#5f695f";
+      ctx.font = "10px sans-serif";
+      ctx.textAlign = "center";
+      if (tickIndexes.includes(i)) {
+        const label = range === "current"
+          ? point.date.slice(5, 7)
+          : point.season.split(" ")[1];
+        ctx.fillText(label, x, H - 12);
+      }
+    });
+  }
+
+  let activeRange = "current";
+
+  function updateRange(range) {
+    activeRange = range;
+    rangeButtons.forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.range === range);
+    });
+    chartNote.textContent = `Showing ${rangeLabel(range)} for FC Walpole in Over 40.`;
+    draw(range);
+  }
+
+  rangeButtons.forEach((button) => {
+    button.addEventListener("click", () => updateRange(button.dataset.range));
+  });
+
+  pageLinks.forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      document.body.classList.add("is-leaving");
+      const destination = link.getAttribute("href");
+      window.setTimeout(() => {
+        window.location.href = destination;
+      }, 180);
+    });
+  });
+
+  updateRange(activeRange);
+  window.addEventListener("resize", () => draw(activeRange));
+})();
+</script>
+</body>
+</html>
